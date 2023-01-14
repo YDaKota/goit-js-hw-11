@@ -1,0 +1,64 @@
+body {
+    background-color: #e0ebeb;
+}
+
+.search-form {
+    /* background-color: rgb(58, 185, 185); */
+    background: linear-gradient(15deg, #13547a 0%, #80d0c7 100%);
+    padding: 20px 0;
+    display: flex;
+    justify-content: center;
+}
+
+input {
+    border: none;
+    border-radius: 3px;
+    padding: 0px 10px;
+    height: 35px;
+
+    &:focus {
+        border: none;
+        outline: none;
+    }
+}
+
+button {
+    padding: 5px 10px;
+    margin-left: 10px;
+    /* font-weight: 500; */
+    background-color: #b1dcd6;
+    color: #24527a;
+    border: 1px solid #a7bcb9;
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.12), 0px 1px 1px rgba(0, 0, 0, 0.14), 0px 2px 1px rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+
+    &:hover {
+        filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+    }
+}
+
+.load-more {
+    display: flex;
+    justify-content: center;
+    display: block;
+    margin: 20px auto;
+}
+
+.button.is-hidden {
+    display: none;
+}
+
+.button > .spinner.is-hidden {
+    display: none;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    clip: rect(0 0 0 0);
+} 
