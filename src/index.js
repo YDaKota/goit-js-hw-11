@@ -1,8 +1,7 @@
-import SimpleLightbox from "simplelightbox";
-import "simplelightbox/dist/simple-lightbox.min.css";
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 import Notiflix from 'notiflix';
 import SearchApiService from './search-service.js';
-
 
 const searchForm = document.querySelector('.search-form');
 const galleryItems = document.querySelector('.gallery');
@@ -14,79 +13,107 @@ const picturesApiService = new SearchApiService();
 searchForm.addEventListener('submit', onSearch);
 loadMoreBtn.addEventListener('click', onLoadMore);
 
-buttonHidden();
-
 let simpleLightbox = new SimpleLightbox('.gallery a', {
-    captions: true,
-    captionsData: 'alt',
-    captionDelay: 250,
+  captions: true,
+  captionsData: 'alt',
+  captionDelay: 250,
 });
 
 async function onSearch(e) {
-    e.preventDefault();
-    
-    picturesApiService.query = e.target.elements.searchQuery.value;
-    searchBtn.disabled = true;
+  e.preventDefault();
 
-    picturesApiService.resetPage();
-    await picturesApiService.fetchPictures().then(response => {
-    
-        const responseHits = response.data.hits;
-        const totalHits = response.data.totalHits;
+  picturesApiService.query = e.target.elements.searchQuery.value;
+  searchBtn.disabled = true;
 
-        if (response.data.hits.length === 0) {
-            Notiflix.Notify.info('Sorry, there are no images matching your search query. Please try again.');
-            e.target.reset();
-            galleryItems.innerHTML = '';
-            return;
-        }
-    
-        if (totalHits > 1) {
-            buttonShow();
-        }
-    
-        if (picturesApiService.query === '') {
-                clearAll();
-                buttonHidden();
-                Notiflix.Notify.info('You cannot search by empty field, try again.');
-                return;
-        } else {
-            Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
-            buttonShow();
-            
-            clearPicturesContainer();
-            
+  picturesApiService.resetPage();
+  await picturesApiService
+    .fetchPictures()
+    .then(response => {
+      const responseHits = response.data.hits;
+      const totalHits = response.data.totalHits;
+
+      if (responseHits.length === 0) {
+        Notiflix.Notify.info(
+          'Sorry, there are no images matching your search query. Please try again.'
+        );
+        e.target.reset();
+        galleryItems.innerHTML = '';
+        buttonHidden();
+        return;
+      }
+
+      if (!picturesApiService.query) {
+        clearAll();
+        buttonHidden();
+        Notiflix.Notify.info('You cannot search by empty field, try again.');
+        return;
+      } else {
+        Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
+        clearPicturesContainer();
+
         galleryItems.innerHTML = createImageCards(responseHits);
         simpleLightbox.refresh();
-    }})
+        smoothScroll();
+
+        if (totalHits <= responseHits.length) {
+          buttonHidden();
+          console.log(totalHits);
+          setTimeout(() => {
+            Notiflix.Notify.info(
+              "We're sorry, but you've reached the end of search results."
+            );
+          }, 5000);
+          return;
+        }
+        else {
+            buttonShow();
+        }
+      }
+    })
     .catch(err => {
-        console.log(err);
+      console.log(err);
     })
     .finally(() => {
-        searchBtn.disabled = false;
+      searchBtn.disabled = false;
     });
 }
 
-function onLoadMore () {
-    picturesApiService.page += 1;
+function onLoadMore() {
+  picturesApiService.page += 1;
 
-    picturesApiService.fetchPictures().then(response => {
-        const responseHits = response.data.hits;
-        galleryItems.insertAdjacentHTML('beforeend', createImageCards(responseHits))
-        simpleLightbox.refresh();
-    });
+  picturesApiService.fetchPictures().then(response => {
+    const responseHits = response.data.hits;
+    galleryItems.insertAdjacentHTML(
+      'beforeend',
+      createImageCards(responseHits)
+    );
+    simpleLightbox.refresh();
+  });
 
-    const totalPages = page * 40;
+  if (totalHits <= responseHits.length) {
+    setTimeout(() => {
+      buttonHidden();
+      Notiflix.Report.info(
+        "We're sorry, but you've reached the end of search results."
+      );
+    }, 5000);
+  }
 
-    if (response.data.totalHits <= totalPages) {
-        buttonHidden();
-        Notiflix.Report.info("We're sorry, but you've reached the end of search results.");
-    }
-    smoothScroll();
+  smoothScroll();
 }
 
-function createImageCards (responseHits) {
-    const markup = responseHits.map(({ largeImageURL, webformatURL, tags, likes, views, comments, downloads }) => {
+function createImageCards(responseHits) {
+  const markup = responseHits
+    .map(
+      ({
+        largeImageURL,
+        webformatURL,
+        tags,
+        likes,
+        views,
+        comments,
+        downloads,
+      }) => {
         return `<div class="photo-card">
                 <a href="${largeImageURL}"><img class="photo" src="${webformatURL}" alt="${tags}" title="${tags}" loading="lazy"/></a>
                 <div class="info">
@@ -104,33 +131,33 @@ function createImageCards (responseHits) {
                     </p>
                 </div>
                 </div>`;
-    }).join('');
-    return markup;
+      }
+    )
+    .join('');
+  return markup;
 }
 
 function clearPicturesContainer() {
-    galleryItems.innerHTML = '';
+  galleryItems.innerHTML = '';
 }
 
-
-
-
 function buttonHidden() {
-    loadMoreBtn.classList.add("visually-hidden");
-};
+  loadMoreBtn.classList.add('visually-hidden');
+}
 
 function buttonShow() {
-    setTimeout(() => {
-        loadMoreBtn.classList.remove("visually-hidden");
-        isBtnVisible = false;
-    }, 3000);
-};
+  setTimeout(() => {
+    loadMoreBtn.classList.remove('visually-hidden');
+    isBtnVisible = false;
+  }, 3000);
+}
 
 function smoothScroll() {
-    const { height: cardHeight } =
-        document.querySelector(".photo-card").firstElementChild.getBoundingClientRect();
-    window.scrollBy({
+  const { height: cardHeight } = document
+    .querySelector('.photo-card')
+    .firstElementChild.getBoundingClientRect();
+  window.scrollBy({
     top: cardHeight * 2,
-    behavior: "smooth",
-});
+    behavior: 'smooth',
+  });
 }
