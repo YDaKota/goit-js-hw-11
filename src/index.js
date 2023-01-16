@@ -32,7 +32,7 @@ async function onSearch(e) {
       const responseHits = response.data.hits;
       const totalHits = response.data.totalHits;
 
-      if (responseHits.length === 0) {
+      if (!responseHits.length) {
         Notiflix.Notify.info(
           'Sorry, there are no images matching your search query. Please try again.'
         );
